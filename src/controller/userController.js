@@ -1,23 +1,18 @@
 const userModel = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const { uploadFile } = require('../utils/awsUpload');
-const validate = require('../utils/validation');
-const mongoose = require("mongoose");
+const { isValidRequestBody, lnameValidator, fnameValidator, isValid, isValidStringTrim, isValidPhone, isValidEmail,isValidObjectId,} = require('../utils/validation');
 const jwt = require('jsonwebtoken')
 
 
-///// validator functions /////
-const isValidRequestBody = function (requestBody) {
-    return Object.keys(requestBody).length > 0;
-};
 
 
 
-const fnameValidator = /[A-Z][a-z]*/
-
-const lnameValidator = /[A-Z]+([ '-][a-zA-Z]+)*/
 
 
+
+
+/////////////////////////////////////// [ creating user ] ///////////////////////
 
 let createUser = async (req, res) => {
 
@@ -25,15 +20,15 @@ let createUser = async (req, res) => {
         let files = req.files
 
         if (!Object.keys(req.body).length > 0) {
-            return res.status(400).send({ status: false, message: "body must be requried !!!!!!!!!!!!!!!!!!!" })
+            return res.status(400).send({ status: false, message: "Request body can't be empty." })
         }
 
         if (!Object.keys(files).length > 0) {
-            return res.status(400).send({ status: false, message: "image file must be requried !!!!!!!!!!!!!!!!!!!" })
+            return res.status(400).send({ status: false, message: "User image must be required." })
         }
 
         if (!Object.keys(req.body.data).length > 0) {
-            return res.status(400).send({ status: false, message: "body must be requried !!!!!!!!!!!!!!!!!!!" })
+            return res.status(400).send({ status: false, message: "User details must be required in body." })
         }
 
         let data = JSON.parse(req.body.data)
@@ -41,94 +36,94 @@ let createUser = async (req, res) => {
         let { fname, lname, email, phone, password, address } = data
 
         if (!Object.keys(data).length > 0) {
-            return res.status(400).send({ status: false, message: "body must be requried" })
+            return res.status(400).send({ status: false, message: "User details is requried." })
 
         } else if (!fname) {
-            return res.status(400).send({ status: false, message: "fname must be requried" })
+            return res.status(400).send({ status: false, message: "First name must be requried" })
 
         } else if (!lname) {
-            return res.status(400).send({ status: false, message: "lname must be requried" })
+            return res.status(400).send({ status: false, message: "Last name must be requried" })
 
         } else if (!email) {
-            return res.status(400).send({ status: false, message: "email must be requried" })
+            return res.status(400).send({ status: false, message: "Email must be requried" })
 
         } else if (!phone) {
-            return res.status(400).send({ status: false, message: "phone must be requried" })
+            return res.status(400).send({ status: false, message: "Phone must be requried" })
 
         } else if (!password) {
-            return res.status(400).send({ status: false, message: "password must be requried" })
+            return res.status(400).send({ status: false, message: "Password must be requried" })
 
         } else if (!address) {
-            return res.status(400).send({ status: false, message: "address must be requried" })
+            return res.status(400).send({ status: false, message: "Address must be requried" })
 
         } else if (!address.shipping && !address.billing) {
-            return res.status(400).send({ status: false, message: "shipping and billing must be requried" })
+            return res.status(400).send({ status: false, message: "Shipping and billing address both are requried" })
 
         } else if (!address.shipping) {
-            return res.status(400).send({ status: false, message: "shipping must be requried" })
+            return res.status(400).send({ status: false, message: "Shipping address must be requried" })
 
         } else if (!address.billing) {
-            return res.status(400).send({ status: false, message: "billing must be requried" })
+            return res.status(400).send({ status: false, message: "Billing address must be requried" })
 
         } else if (!address.shipping.street) {
-            return res.status(400).send({ status: false, message: "shipping street must be requried" })
+            return res.status(400).send({ status: false, message: "shipping address's street must be requried" })
 
         } else if (!address.shipping.city) {
-            return res.status(400).send({ status: false, message: "shipping city must be requried" })
+            return res.status(400).send({ status: false, message: "shipping address's city must be requried" })
 
         } else if (!address.shipping.pincode) {
-            return res.status(400).send({ status: false, message: "shipping pincode must be requried" })
+            return res.status(400).send({ status: false, message: "shipping address's pincode must be requried" })
 
         } else if (!address.billing.street) {
-            return res.status(400).send({ status: false, message: "billing street must be requried" })
+            return res.status(400).send({ status: false, message: "billing address's street must be requried" })
 
         } else if (!address.billing.city) {
-            return res.status(400).send({ status: false, message: "billing city must be requried" })
+            return res.status(400).send({ status: false, message: "billing address's city must be requried" })
 
         } else if (!address.billing.pincode) {
-            return res.status(400).send({ status: false, message: "billing pincode must be requried" })
+            return res.status(400).send({ status: false, message: "billing address's pincode must be requried" })
 
         } else if (address != undefined) {
             if (address.shipping.street != undefined) {
                 if (typeof address.shipping.street != 'string' || address.shipping.street.trim().length == 0) {
-                    return res.status(400).send({ status: false, message: "shipping street can not be a empty string" })
+                    return res.status(400).send({ status: false, message: "shipping address's street can not be an empty string" })
                 }
             }
             if (address.shipping.city != undefined) {
                 if (typeof address.shipping.city != 'string' || address.shipping.city.trim().length == 0) {
-                    return res.status(400).send({ status: false, message: "shipping city can not be a empty string" })
+                    return res.status(400).send({ status: false, message: "shipping address's city can not be an empty string" })
                 }
             }
 
             if (address.shipping.pincode != undefined) {
-                if (address.shipping.pincode.toString().trim().length == 0 || address.shipping.pincode.toString().trim().length != 6) {
-                    return res.status(400).send({ status: false, message: "shipping Pincode can not be a empty string or must be 6 digit number " })
+                if (address.shipping.pincode.trim().length != 6) {
+                    return res.status(400).send({ status: false, message: "shipping address's Pincode can not be an empty string or must be 6 digit number " })
                 }
             }
             if (address.billing.street != undefined) {
                 if (typeof address.billing.street != 'string' || address.billing.street.trim().length == 0) {
-                    return res.status(400).send({ status: false, message: "billing street can not be a empty string" })
+                    return res.status(400).send({ status: false, message: "billing street can not be an empty string" })
                 }
             }
             if (address.billing.city != undefined) {
                 if (typeof address.billing.city != 'string' || address.billing.city.trim().length == 0) {
-                    return res.status(400).send({ status: false, message: "billing city can not be a empty string" })
+                    return res.status(400).send({ status: false, message: "billing city can not be an empty string" })
                 }
             }
 
             if (address.billing.pincode != undefined) {
                 if (address.billing.pincode.toString().trim().length == 0 || address.billing.pincode.toString().trim().length != 6) {
-                    return res.status(400).send({ status: false, message: "billing Pincode can not be a empty string or must be 6 digit number " })
+                    return res.status(400).send({ status: false, message: "billing Pincode can not be an empty string or must be 6 digit number " })
                 }
             }
         }
 
 
-        if (!validate.isValidEmail(email)) {
-            return res.status(400).send({ status: false, message: "email id must be valid formate" })
+        if (!isValidEmail(email)) {
+            return res.status(400).send({ status: false, message: "email id must be valid format" })
 
-        } if (!validate.isValidPhone(phone)) {
-            return res.status(400).send({ status: false, message: "phone no must be valid formate" })
+        } if (!isValidPhone(phone)) {
+            return res.status(400).send({ status: false, message: "phone no must be valid format" })
 
         }
 
@@ -148,16 +143,17 @@ let createUser = async (req, res) => {
         if (password.length > 15) {
             return res.status(400).send({ status: false, message: "Password cannot be more than 15 characters" })
         }
-        const saltRounds = 10;
-        const hash = bcrypt.hashSync(password, saltRounds);
+       
+        const hash = bcrypt.hashSync(password, 10 );
         data.password = hash;
 
         if (files && files.length > 0) {
             //upload to s3 and get the uploaded link
             // res.send the link back to frontend/postman
-            let p = await uploadFile(files[0])
-            data.profileImage = p;
-        } else if (!files) {
+            let image = await uploadFile(files[0])
+            
+            data.profileImage = image;
+        } else{
             return res.status(400).send({ status: false, message: "image file not found" })
         }
 
@@ -165,15 +161,15 @@ let createUser = async (req, res) => {
         return res.status(201).send({ status: true, message: "User created successfully", data: allData })
 
 
-    } catch (err) {
-        return res.status(500).send({ status: false, message: err.message })
+    } catch (error) {
+        return res.status(500).send({ status: false, message: error.message })
     }
 }
 
 
-//////////////////////////////////////////////////////   [ login ]   ////////////////////////////////////////////////////
+//////////////////////////////////////////////////////   [ User login ]   ////////////////////////////////////////////////////
 
-const userLogin = async function (req, res) {
+const userLogin = async  (req, res) => {
 
     try {
 
@@ -188,20 +184,20 @@ const userLogin = async function (req, res) {
         } else if (!password) {
             return res.status(400).send({ status: false, message: "password must be present" })
 
-        } else if (validate.isValidStringTrim(password)) {
+        } else if (isValidStringTrim(password)) {
             return res.status(400).send({ status: false, message: "password cannot be empty" })
 
-        } else if (validate.isValidStringTrim(email)) {
+        } else if (isValidStringTrim(email)) {
             return res.status(400).send({ status: false, message: "email cannot be empty" })
 
-        } else if (!validate.isValidEmail(email)) {
+        } else if (!isValidEmail(email)) {
             return res.status(400).send({ status: false, message: "email must be valid formate" })
 
         }
 
         let checkEmail = await userModel.findOne({ email: email })
         if (!checkEmail) {
-            return res.status(404).send({ status: false, message: "Please check email and try again" })
+            return res.status(404).send({ status: false, message: "Email not registered yet"})
         }
 
         let checkPassword = await bcrypt.compare(password, checkEmail.password)
@@ -217,7 +213,7 @@ const userLogin = async function (req, res) {
             exp: Math.floor(Date.now() / 1000) + (60 * 60)
         }, "key@$%&*0101")
 
-        res.setHeader("function_group_18_uranium", token)
+        res.setHeader("x-auth-token", token)
         return res.status(200).send({ status: true, message: "User login successfull", data: { userId: checkEmail._id, token } })
 
     } catch (error) {
@@ -229,13 +225,13 @@ const userLogin = async function (req, res) {
 
 ///////////////////////////////////////////////////// [ get details ]  /////////////////////////////////////////////////////
 
-let getDetails = async function (req, res) {
+let getDetails = async (req, res) => {
 
     try {
 
         let user_id = req.params.userId;
 
-        var isValid = validate.isValidObjectId(user_id);
+        var isValid = isValidObjectId(user_id);
         if (isValid == false) {
             return res.status(400).send({ status: false, message: "please provide valid userId" });
         }
@@ -244,10 +240,10 @@ let getDetails = async function (req, res) {
             return res.status(404).send({ status: false, message: "User not found!" });
         }
 
-        res.status(200).send({ status: "true", message: "User profile details", data: userDetails, });
+        res.status(200).send({ status:true, message: "User profile details", data: userDetails, });
 
-    } catch (err) {
-        res.status(500).send({ status: false, message: err.message })
+    } catch (error) {
+        res.status(500).send({ status: false, message: error.message })
     }
 
 };
@@ -256,20 +252,18 @@ let getDetails = async function (req, res) {
 const updateUser = async function (req, res) {
 
     try {
-
+        let userId = req.params.userId;
         let body = req.body.data
-        if (!body) {
-            return res.status(400).send({ status: false, msg: "body value must be present if want to update" })
-        }
+        let files = req.files
+      
         let bodyData = JSON.parse(body) // convert the multi-part data from string to an object
         if (!bodyData) {
             return res.status(400).send({ status: false, msg: "body value must be present if want to update" })
         }
         let { fname, lname, email, phone, password, address } = bodyData
-        let userId = req.params.userId;
-        let files = req.files
+        
 
-        if (!validate.isValidObjectId(userId)) {
+        if (!isValidObjectId(userId)) {
             return res.status(404).send({ status: false, msg: "user Id not valid" })
         }
 
@@ -279,8 +273,8 @@ const updateUser = async function (req, res) {
             return res.status(404).send({ status: false, msg: "No user found with this userId" })
         }
 
-        if (fname != undefined) {
-            if (validate.isValidStringTrim(fname)) {
+        if (fname) {
+            if (isValidStringTrim(fname)) {
                 return res.status(400).send({ status: false, msg: "Please Provide fname & can't be a empty string" })
             }
 
@@ -290,9 +284,9 @@ const updateUser = async function (req, res) {
         }
 
 
-        if (lname != undefined) {
+        if (lname) {
 
-            if (validate.isValidStringTrim(lname)) {
+            if (isValidStringTrim(lname)) {
                 return res.status(400).send({ status: false, message: "Please Provide lname can't be a empty string" })
             }
 
@@ -301,13 +295,13 @@ const updateUser = async function (req, res) {
             }
         }
 
-        if (email != undefined) {
+        if (email) {
 
-            if (validate.isValidStringTrim(email)) {
+            if (isValidStringTrim(email)) {
                 return res.status(400).send({ status: false, message: "Please Provide Email can't be a empty string" })
             }
 
-            if (!validate.isValidEmail(email)) {
+            if (!isValidEmail(email)) {
                 return res.status(400).send({ status: false, message: "Email id must be valid format" })
             }
 
@@ -326,13 +320,13 @@ const updateUser = async function (req, res) {
             return res.status(400).send({ status: false, message: "Please upload profile image" })
         }
 
-        if (phone != undefined) {
+        if (phone) {
 
-            if (validate.isValidStringTrim(phone)) {
+            if (isValidStringTrim(phone)) {
                 return res.status(400).send({ status: false, message: "Please Provide phone number can not be a empty string" })
             }
 
-            if (!validate.isValidPhone(phone)) {
+            if (!isValidPhone(phone)) {
                 return res.status(400).send({ status: false, message: "phone number must be valid format 10 digits" })
             }
 
@@ -342,9 +336,9 @@ const updateUser = async function (req, res) {
             }
         }
 
-        if (password != undefined) {
+        if (password) {
 
-            if (validate.isValidStringTrim(password)) {
+            if (isValidStringTrim(password)) {
                 return res.status(400).send({ status: false, message: "Please Provide password & can not be a empty string" })
             }
 
@@ -355,26 +349,26 @@ const updateUser = async function (req, res) {
                 return res.status(400).send({ status: false, message: "Password cannot be more than 15 characters" })
             }
 
-            const saltRounds = 10;
-            const hash = bcrypt.hashSync(password, saltRounds);
+            
+            const hash = bcrypt.hashSync(password, 10);
             bodyData.password = hash;
         }
 
-        if (address != undefined) {
-            if (validate.isValid(address))
+        if (address) {
+            if (isValid(address))
                 return res.status(400).send({ status: false, message: "Address should be in object and must contain shipping and billing addresses" });
 
 
-            let tempAddress = JSON.parse(JSON.stringify(checkUser.address))
+            let tempAddress = checkUser.address
 
-            console.log(tempAddress)
+            // console.log(address)
 
-            if (address.shipping != undefined) {
+            if (address.shipping) {
 
-                if (validate.isValid(bodyData.address.shipping))
+                if (isValid(bodyData.address.shipping))
                     return res.status(400).send({ status: false, message: "Shipping address should be in object and must contain street, city and pincode" });
-                if (address.shipping.street != undefined) {
-                    if (validate.isValidStringTrim(address.shipping.street)) {
+                if (address.shipping.street) {
+                    if (isValidStringTrim(address.shipping.street)) {
                         return res.status(400).send({ status: false, message: "shipping street can not be a empty string" })
                     }
 
@@ -382,27 +376,26 @@ const updateUser = async function (req, res) {
 
                 }
 
-                if (address.shipping.city != undefined) {
-                    if (validate.isValidStringTrim(address.shipping.city)) {
+                if (address.shipping.city) {
+                    if (isValidStringTrim(address.shipping.city)) {
                         return res.status(400).send({ status: false, message: "shipping city can not be a empty string" })
                     }
 
                     tempAddress.shipping.city = address.shipping.city
                 }
 
-                if (address.shipping.pincode != undefined) {
-                    if (address.shipping.pincode.toString().trim().length == 0 || address.shipping.pincode.toString().trim().length != 6) {
+                if (address.shipping.pincode) {
+                    if (address.shipping.pincode.toString().trim().length != 6) {
                         return res.status(400).send({ status: false, message: "shipping Pincode can not be a empty string or must be 6 digit number " })
                     }
 
                     tempAddress.shipping.pincode = address.shipping.pincode
-                }
+                }}
 
-                if (validate.isValid(bodyData.address.billing))
-                    return res.status(400).send({ status: false, message: "billing address should be in object and must contain street, city and pincode" });
-
-                if (address.billing.street != undefined) {
-                    if (validate.isValidStringTrim(address.billing.street)) {
+                if (address.billing){
+                   
+                if (address.billing.street) {
+                    if (isValidStringTrim(address.billing.street)) {
                         return res.status(400).send({ status: false, message: "billing street can not be a empty string" })
                     }
 
@@ -410,16 +403,16 @@ const updateUser = async function (req, res) {
 
                 }
 
-                if (address.billing.city != undefined) {
-                    if (validate.isValidStringTrim(address.billing.city)) {
+                if (address.billing.city ) {
+                    if (isValidStringTrim(address.billing.city)) {
                         return res.status(400).send({ status: false, message: "billing city can not be a empty string" })
                     }
 
                     tempAddress.billing.city = address.billing.city
                 }
 
-                if (address.billing.pincode != undefined) {
-                    if (address.billing.pincode.toString().trim().length == 0 || address.billing.pincode.toString().trim().length != 6) {
+                if (address.billing.pincode) {
+                    if (address.billing.pincode.toString().trim().length != 6) {
                         return res.status(400).send({ status: false, message: "billing Pincode can not be a empty string or must be 6 digit number " })
                     }
 
@@ -438,7 +431,7 @@ const updateUser = async function (req, res) {
 
     catch (err) {
 
-        res.status(500).send({ status: false, error: err.message })
+        res.status(500).send({ status: false, message: err.message })
     }
 
 }

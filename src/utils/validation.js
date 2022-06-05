@@ -1,5 +1,14 @@
 const mongoose = require('mongoose');
 
+
+const isValidRequestBody = function (requestBody) {
+  return Object.keys(requestBody).length > 0;
+};
+
+const fnameValidator = /([A-Za-z]+)*/
+
+const lnameValidator = /([A-Z]+)([ '-a-zA-Z]+)*/
+
 const isValid = (value) => {
   if(typeof value === "undefined" || typeof value === "null") return true;
   if(typeof value === "string" && value.trim().length == 0) return true;
@@ -41,7 +50,7 @@ const isValidObjectId = (objectId) => {
 }
 
 const isValidPrice = (price) => {
-  return /^[1-9]\d{0,7}(?:\.\d{1,2})?$/.test(price)
+  return /^([0-9]{0,7})(.([0-9]{2}))?$/.test(price)
 }
 
 const isValidSize = (sizes) => {
@@ -52,4 +61,4 @@ const isValidNum = (num) => {
   return /^[0-9]*[1-9]+$|^[1-9]+[0-9]*$/.test(num);
 }
 
-module.exports = { isValid, isValidBody, isValidString, isValidStringTrim, isValidPhone, isValidEmail, isValidPwd , isValidObjectId, isValidPincode, isValidPrice, isValidSize, isValidNum }
+module.exports = { isValidRequestBody, fnameValidator, lnameValidator, isValid, isValidBody, isValidString, isValidStringTrim, isValidPhone, isValidEmail, isValidPwd , isValidObjectId, isValidPincode, isValidPrice, isValidSize, isValidNum }

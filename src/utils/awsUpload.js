@@ -17,11 +17,12 @@ const uploadFile = async (files) => {
       Body: files.buffer
     };
 
-    s3.upload(uploadParams, function(err,data) {
+    s3.upload(uploadParams, (err,data) => {
       if(err) {
         return reject({ 'error': err });
-      }
-      return resolve(data.Location);
+      }else{
+      // console.log(data)
+      return resolve(data.Location);}
     })
   })
 }

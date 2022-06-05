@@ -3,19 +3,19 @@ const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
   title: {
-    type: String, require: true, unique: true
+    type: String, require: true, unique: true, trim:true
   },
   description: {
-    type: String, require: true
+    type: String, require: true,trim:true
   },
   price: {
     type: Number, require: true
   },             ////, valid number/decimal
   currencyId: {
-    type: String, require: true
+    type: String, require: true, trim:true
   },           //////  INR
   currencyFormat: {
-    type: String, require: true
+    type: String, require: true,trim:true
   },       ///Rupee symbol
   isFreeShipping: {
     type: Boolean, default: false
@@ -24,7 +24,7 @@ const productSchema = new mongoose.Schema({
     type: String, require: true
   },  // s3 link
   style: {
-    type: String
+    type: String,trim:true
   },
   availableSizes: {
     type: [String], enum: ["S", "XS", "M", "X", "L", "XXL", "XL"]
