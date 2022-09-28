@@ -1,5 +1,4 @@
 const productModel = require('../models/productModel');
-const mongoose = require('mongoose');
 const { uploadFile } = require('../utils/awsUpload');
 const moment = require('moment')
 const { isValidObjectId } = require('../utils/validation')
@@ -173,14 +172,14 @@ const getProductById= async function (req, res) {
           return res.status(404).send({status:false, message:"Please enter valid product id"})
       }
       let isValidProductId = await productModel.findById({_id:id, isDeleted:true})
-      if(isValidProductId){
+      if(!  isValidProductId){
           return res.status(404).send({status:false, message:"Product not found !"})
       }
       
      if(isValidProductId.isDeleted == "true"){
     return res.status(400).send({status: true,message: "This product is deleted"});
-
   }
+
       let allProducts = await productModel.findOne({ _id: id, isDeleted: false }).select({deletedAt: 0})
 
       return res.status(200).send({status:true, message:"product found successfully" ,data: allProducts})
@@ -329,6 +328,8 @@ const updateProducts = async function (req, res) {
   }
 }
 
+
+
 //--------------------[        deleteProductsById     ]------------------------------------
 
 const deleteProductsById= async function (req, res) {
@@ -342,12 +343,7 @@ const deleteProductsById= async function (req, res) {
       if(!isValidProductId){
           return res.status(404).send({status:false, message:"Producct not found. Either it has been deleted or not yet present in Database."})
       }
-  //     let isDeleted = await productModel.findOne({ _id:id , isDeleted: true });
 
-  //    if(isDeleted){
-  //   return res.status(404).send({status: true,message: "product is already deleted"});
-
-  // }
      let time = moment().format("dddd, MMMM Do YYYY, h:mm:ss a"); 
       await productModel.findOneAndUpdate({ _id: id, isDeleted: false }, { $set: { isDeleted: true, deletedAt: time } })
       return res.status(200).send({status:true, message:"Product deleted successfully."})

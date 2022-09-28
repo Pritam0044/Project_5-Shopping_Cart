@@ -17,7 +17,7 @@ const createOrder = async (req, res) => {
       if(!findCart) return res.status(404).send({ status: false, message: `No cart found with this '${userId}' user-ID` })
   
       //checking for an empty cart
-      if(findCart.items.length == 0) return res.status(400).send({ status: false, message: "Can't create oreder with an empty cart" });
+      if(findCart.items.length == 0) return res.status(400).send({ status: false, message: "Can't create order with an empty cart" });
   
       let data = req.body;
   

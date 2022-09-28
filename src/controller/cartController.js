@@ -96,7 +96,7 @@ const createCart = async function(req,res){
 const updateCart = async function (req, res) {
     try {
         let data = req.body
-        // let error = []
+
         if (Object.keys(data).length == 0)
             return res.status(400).send({ status: false, message: "Please enter data to update cart details" })
 
@@ -180,7 +180,7 @@ const getCart = async (req, res) =>{
             return res.status(404).send({ status: false, msg: "No cart found with this userId" })
         }
         if(checkCart.items.length == 0 )
-            return res.status(404).send({status:false, message:"Caart is empty."})
+            return res.status(404).send({status:false, message:"Cart is empty."})
 
         
         return res.status(200).send({ status: true, cartData: checkCart})
@@ -205,12 +205,6 @@ const deleteCart = async (req, res) =>{
     if(!isValidObjectId(userId)){
         return res.status(400).send({status:false, msg:"userId is not Valid"})
     }
-
-    // let checkCart = await cartModel.findOne({userId:userId})
-
-    // if (!checkCart) {
-    //     return res.status(404).send({ status: false, msg: "No cart found with this userId" })
-    // }
 
     //checking if the cart exist with this userId or not
     let findCart = await cartModel.findOne({ userId: userId });

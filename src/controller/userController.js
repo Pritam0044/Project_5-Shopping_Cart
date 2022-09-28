@@ -56,9 +56,6 @@ let createUser = async (req, res) => {
         } else if (!address) {
             return res.status(400).send({ status: false, message: "Address must be requried" })
 
-        } else if (!address.shipping && !address.billing) {
-            return res.status(400).send({ status: false, message: "Shipping and billing address both are requried" })
-
         } else if (!address.shipping) {
             return res.status(400).send({ status: false, message: "Shipping address must be requried" })
 
@@ -129,12 +126,12 @@ let createUser = async (req, res) => {
 
         let EmailIdINDB = await userModel.findOne({ email })
         if (EmailIdINDB) {
-            return res.status(400).send({ status: false, message: "Email id. already registered" })
+            return res.status(409).send({ status: false, message: "Email id. already registered" })
         }
 
         let phoneNoInDB = await userModel.findOne({ phone })
         if (phoneNoInDB) {
-            return res.status(400).send({ status: false, message: "phoneNo. number already registered" })
+            return res.status(409).send({ status: false, message: "phoneNo. number already registered" })
         }
 
         if (password.length < 8) {
@@ -191,13 +188,13 @@ const userLogin = async  (req, res) => {
             return res.status(400).send({ status: false, message: "email cannot be empty" })
 
         } else if (!isValidEmail(email)) {
-            return res.status(400).send({ status: false, message: "email must be valid formate" })
+            return res.status(400).send({ status: false, message: "email must be valid format" })
 
         }
 
         let checkEmail = await userModel.findOne({ email: email })
         if (!checkEmail) {
-            return res.status(404).send({ status: false, message: "Email not registered yet"})
+            return res.status(404).send({ status: false, message: "Email not present."})
         }
 
         let checkPassword = await bcrypt.compare(password, checkEmail.password)
@@ -307,7 +304,7 @@ const updateUser = async function (req, res) {
 
             let find = await userModel.findOne({ email: email })
             if (find) {
-                return res.status(400).send({ status: false, message: "Already exist please enter another email" })
+                return res.status(409).send({ status: false, message: "Already exist please enter another email" })
             }
         }
 
@@ -332,7 +329,7 @@ const updateUser = async function (req, res) {
 
             let find = await userModel.findOne({ phone: phone })
             if (find) {
-                return res.status(400).send({ status: false, message: "Already exist please enter another phone" })
+                return res.status(409).send({ status: false, message: "Already exist please enter another phone" })
             }
         }
 
@@ -361,7 +358,7 @@ const updateUser = async function (req, res) {
 
             let tempAddress = checkUser.address
 
-            // console.log(address)
+        
 
             if (address.shipping) {
 
